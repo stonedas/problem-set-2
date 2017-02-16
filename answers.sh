@@ -65,7 +65,8 @@ echo "answer-5: $answer_5"
 
 chr22="$datasets/bedtools/ctcf.hela.chr22.bg.gz"
 
-answer_6=$(bedtools spacing -i $chr22 | sort -k5nr | cut -f5 | head -n1)
+answer_6=$(bedtools spacing -i $chr22 | sort -k5nr | cut -f5 | head -n1 |\
+awk '{print $1 " :Largest spacing between ctcf intervals on chr22"}') 
 
 echo "answer-6: $answer_6"
 
