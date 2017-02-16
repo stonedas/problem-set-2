@@ -16,6 +16,13 @@ echo "answer-1: $answer_1"
 #2 Use BEDtools to calculate the GC content of nucleotides 19,000,000 to 19,000,500 on chr22 of hg19 genome build. 
 #  Report the GC content as a fraction e.g., 0.50
 
+fasta="$datasets/fasta/hg19.chr22.fa"
+bed="$datasets/bed/interval.bed"
+
+answer_2=$(bedtools nuc -fi $fasta -bed $bed | grep -v "^#" | awk 'BEGIN {OFS="\t"} {printf $5 * 100}' | cut -f5)
+
+echo "answer-2: $answer_2" 
+
 
 
 
@@ -55,4 +62,12 @@ answer_5=$(bedtools intersect -v -a $chr22 -b $hg19 | awk 'BEGIN {OFS="\t"} {pri
 echo "answer-5: $answer_5" 
 
 #6 Use one or more BEDtools that we haven't covered in class. Be creative.
+
+chr22="$datasets/bedtools/ctcf.hela.chr22.bg.gz"
+
+answer_6=$(bedtools spacing -i $chr22 | sort -k5nr | cut -f5 | head -n1)
+
+echo "answer-6: $answer_6"
+
+
 
