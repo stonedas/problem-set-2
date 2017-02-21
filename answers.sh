@@ -8,7 +8,7 @@ H3K4me3="$datasets/bed/encode.h3k4me3.hela.chr22.bed.gz"
 
 #1 Use BEDtools intersect to identify the size of the largest overlap between CTCF and H3K4me3 locations.
 
-answer_1=$(bedtools intersect -wo -a $CTCF -b $H3K4me3 | cut -f15 | sort -k1nr | head | grep 6314)
+answer_1=$(bedtools intersect -wo -a $CTCF -b $H3K4me3 | awk 'BEGIN {OFS="\t"} ($4 == "CTCF")' | sort -k15nr | cut -f15 | head -n1)
  
 echo "answer-1: $answer_1"
 
@@ -32,7 +32,7 @@ echo "answer-2: $answer_2"
 CTCFpeaks="$datasets/bed/encode.tfbs.chr22.bed.gz"
 signal="$datasets/bedtools/ctcf.hela.chr22.bg.gz"
 
-answer_3=$(bedtools map -c 4 -o mean -a $CTCFpeaks -b $signal | awk 'BEGIN {FS="\t"} ($5 !=".")'| sort -k5gr | awk 'BEGIN {OFS="\t"} {print $0, $3 - $2}' | cut -f6 | head -n1)
+answer_3=$(bedtools map -c 4 -o mean -a $CTCFpeaks -b $signal | awk 'BEGIN {OFS="\t"} ($5 !=".")' | awk 'BEGIN {OFS="\t"} ($4 == "CTCF")' | sort -k5gr | awk 'BEGIN {OFS="\t"} {print $0, $3 - $2}' | cut -f6 | head -n1)
 
 echo "answer-3: $answer_3"
 
@@ -53,11 +53,10 @@ echo "answer-4: $answer_4"
 #5 Use BEDtools to identify the longest interval on chr22 that is not
 #  covered by genes.hg19.bed.gz. Report the interval like chr1:100-500
 
-chr22="$datasets/bedtools/ctcf.hela.chr22.bg.gz"
-hg19="$datasets/bed/genes.hg19.bed.gz"
+bed="$datasets/bed/genes.hg19.bed.gz"
+genome="$datasets/genome/hg19.genome"
 
-answer_5=$(bedtools intersect -v -a $chr22 -b $hg19 | awk 'BEGIN {OFS="\t"} {print $0, $3 - $2}' | sort -k5nr | awk '{print $1 ":" $2 "-" $3 }' | head -n2)
-
+answer_5=$( bedtools complement -i $bed -g $genome | awk 'BEGIN {OFS="\t"} {print $0, $3 - $2}' | sort -k4nr | awk '{OFS="\t"} {print $1 ":" $2 "-" $3}' | grep chr22 | head -n1)
 
 echo "answer-5: $answer_5" 
 
@@ -65,8 +64,7 @@ echo "answer-5: $answer_5"
 
 chr22="$datasets/bedtools/ctcf.hela.chr22.bg.gz"
 
-answer_6=$(bedtools spacing -i $chr22 | sort -k5nr | cut -f5 | head -n1 |\
-awk '{print $1 " :Largest spacing between ctcf intervals on chr22"}') 
+answer_6=$(bedtools spacing -i $chr22 | awk 'BEGIN {OFS="\t"} ($5 !=".")' | cut -f5 | sort -k1nr | head -n1 | awk '{print $1 " :Largest spacing between ctcf intervals on chr22"}') 
 
 echo "answer-6: $answer_6"
 
